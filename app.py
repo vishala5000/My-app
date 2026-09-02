@@ -1,28 +1,29 @@
 import flet as ft
 
 def main(page: ft.Page):
-    page.title = "My Fast Python App"
+    page.title = "My Python App"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
-    txt_number = ft.TextField(value="0", text_align=ft.TextAlign.RIGHT, width=100)
+    # Create a text element to show the count
+    counter = ft.Text("0", size=50, weight=ft.FontWeight.BOLD)
 
-    def minus_click(e):
-        txt_number.value = str(int(txt_number.value) - 1)
+    # Function to increase the count
+    def increment(e):
+        counter.value = str(int(counter.value) + 1)
         page.update()
 
-    def plus_click(e):
-        txt_number.value = str(int(txt_number.value) + 1)
-        page.update()
-
+    # Add elements to the page
     page.add(
-        ft.Row(
+        ft.Column(
             [
-                ft.IconButton(ft.icons.MINUS, on_click=minus_click),
-                txt_number,
-                ft.IconButton(ft.icons.ADD, on_click=plus_click),
+                ft.Text("Hello from Python!", size=24, color="blue"),
+                ft.Container(content=counter, margin=10),
+                ft.ElevatedButton("Click Me", on_click=increment, width=200),
             ],
-            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
     )
 
-ft.app(target=main)
+if __name__ == "__main__":
+    ft.app(target=main)
