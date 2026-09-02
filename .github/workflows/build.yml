@@ -21,11 +21,11 @@ jobs:
 
       - name: Build APK
         run: |
-          flet build apk --release
+          flet build apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: my-flet-app
-          path: build/apk/release/*.apk
+          path: build/apk/**/*.apk
           retention-days: 5
