@@ -17,23 +17,12 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Flet
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-
-      # 1. Pre-install the EXACT Flutter version Flet 0.86.5 requires
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.44.8' 
           channel: 'stable'
           cache: true
-
-      # 2. Set the environment variable so Flet finds it immediately
-      - name: Set Flet Flutter Path
-        run: |
-          echo "FLET_FLUTTER_DIR=$(dirname $(which flutter))" >> $GITHUB_ENV
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
@@ -45,18 +34,20 @@ jobs:
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Build APK
+      - name: Install & Build (Single Session)
         run: |
-          # Add Python bin to PATH to ensure 'flet' command is found
-          export PATH="$PATH:$(python -m site --user-base)/bin:$(dirname $(which python))/../bin"
+          # 1. Set Flet's Flutter path
+          export FLET_FLUTTER_DIR=$(dirname $(which flutter))
           
-          # Use 'python -m flet' as a fallback if 'flet' command fails
-          if ! command -v flet &> /dev/null; then
-            echo "flet command not found, using python -m flet"
-            python -m flet build apk --module-name app
-          else
-            flet build apk --module-name app
-          fi
+          # 2. Install dependencies
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          
+          # 3. Verify flet is installed
+          python -c "import flet; print('Flet version:', flet.__version__)"
+          
+          # 4. Build APK using python -m to avoid PATH issues
+          python -m flet build apk --module-name app
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
