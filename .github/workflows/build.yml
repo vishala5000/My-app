@@ -47,8 +47,16 @@ jobs:
 
       - name: Build APK
         run: |
-          # Since Flutter is already installed, this should run without prompts
-          flet build apk --module-name app
+          # Add Python bin to PATH to ensure 'flet' command is found
+          export PATH="$PATH:$(python -m site --user-base)/bin:$(dirname $(which python))/../bin"
+          
+          # Use 'python -m flet' as a fallback if 'flet' command fails
+          if ! command -v flet &> /dev/null; then
+            echo "flet command not found, using python -m flet"
+            python -m flet build apk --module-name app
+          else
+            flet build apk --module-name app
+          fi
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
