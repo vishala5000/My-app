@@ -7,36 +7,40 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Install Flet
+      - name: Install dependencies
         run: |
+          pip install --upgrade pip
           pip install -r requirements.txt
 
-      # We don't need to pre-install Flutter anymore; 
-      # Flet will handle it if we allow it via 'yes |'
-      
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Accept Android Licenses
         run: |
-          # Install basic Android tools first so licenses can be accepted
-          sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build APK
         run: |
-          # 'yes |' automatically answers 'y' when Flet asks to install Flutter 3.44.8
-          yes | flet build apk
+          # 'yes |' auto-accepts Flutter SDK installation
+          # '--module-name app' tells Flet to use app.py
+          yes | flet build apk --module-name app
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: my-flet-app
+          name: android-apk
           path: build/apk/**/*.apk
-          retention-days: 5
+          retention-days: 7
