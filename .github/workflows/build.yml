@@ -17,10 +17,23 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install Flet
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+
+      # 1. Pre-install the EXACT Flutter version Flet 0.86.5 requires
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.8' 
+          channel: 'stable'
+          cache: true
+
+      # 2. Set the environment variable so Flet finds it immediately
+      - name: Set Flet Flutter Path
+        run: |
+          echo "FLET_FLUTTER_DIR=$(dirname $(which flutter))" >> $GITHUB_ENV
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
@@ -34,9 +47,8 @@ jobs:
 
       - name: Build APK
         run: |
-          # 'yes |' auto-accepts Flutter SDK installation
-          # '--module-name app' tells Flet to use app.py
-          yes | flet build apk --module-name app
+          # Since Flutter is already installed, this should run without prompts
+          flet build apk --module-name app
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
