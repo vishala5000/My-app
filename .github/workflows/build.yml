@@ -19,29 +19,21 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # 1. Install Flutter manually so Flet doesn't have to ask
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0' # Use a stable version compatible with Flet 0.86
-          channel: 'stable'
-
-      # 2. Tell Flet where Flutter is installed
-      - name: Set Flutter Path
-        run: |
-          echo "FLET_FLUTTER_DIR=$(which flutter | sed 's|bin/flutter||')" >> $GITHUB_ENV
-
-      # 3. Accept Android Licenses (Required for building APK)
+      # We don't need to pre-install Flutter anymore; 
+      # Flet will handle it if we allow it via 'yes |'
+      
       - name: Accept Android Licenses
         run: |
-          yes | flutter doctor --android-licenses || true
+          # Install basic Android tools first so licenses can be accepted
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      # 4. Build the APK
       - name: Build APK
         run: |
-          flet build apk
+          # 'yes |' automatically answers 'y' when Flet asks to install Flutter 3.44.8
+          yes | flet build apk
 
-      # 5. Upload the result
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
