@@ -1,2 +1,8 @@
+flet>=0.86.0
 piper-tts
 Pillow
+onnxruntime
+numpy
+ffmpeg-python
+soundfile
+pathvalidate
